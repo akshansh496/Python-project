@@ -136,20 +136,23 @@ def appointment():
 
 #VIEWING MY APPOINTMENTS
 def view_appointment():
-    pat_id=int(input("ENTER YOUR PATIENT ID:"))
-    cursor.execute("SELECT PATIENT_ID FROM APPOINTMENT_TABLE WHERE PATIENT_ID=?",(pat_id,))
-    patient_ids = cursor.fetchall()
-    if patient_ids:
-            print(f"{'PATIENT_ID':<12}{'DOCTOR_ID':<12}{'APPOINTMENT_ID':<20}{'DATE AND TIME':<30}")
-            print("-"*60)
-            cursor.execute('SELECT * FROM APPOINTMENT_TABLE WHERE PATIENT_ID=?',(pat_id,))
-            rows= cursor.fetchall()
-            for row in rows:
-                print(f"{row[0]:<12}{row[1]:<12}{row[2]:<20}{row[3]:<30}")
+    pat_id = int(input("ENTER YOUR PATIENT ID:"))
+    
+    # Fetch appointments for the given PATIENT_ID
+    cursor.execute("SELECT * FROM APPOINTMENT_TABLE WHERE PATIENT_ID=?", (pat_id,))
+    rows = cursor.fetchall()
+    print(f"{'APPOINTMENT_ID':<20}{'PATIENT_ID':<12}{'DOCTOR_ID':<12}{'DATE AND TIME':<30}")
+    print("-" * 60)
+    if rows:
+        print(f"{'APPOINTMENT_ID':<20}{'PATIENT_ID':<12}{'DOCTOR_ID':<12}{'DATE AND TIME':<30}")
+        print("-" * 60)
+        for row in rows:   
+            print(f"{row[0]:<20}{row[1]:<12}{row[2]:<12}{row[3]:<30}")
     else:
-            print("YOU DON'T HAVE ANY APPOINTMENT")
+        print("YOU DON'T HAVE ANY APPOINTMENTS")
 
     conn.commit()
+
 
 #main
 print("\nWELCOME TO HOSPITAL MANAGEMENT SYSTEM")
