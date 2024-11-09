@@ -136,10 +136,6 @@ def appointment():
 
 #VIEWING MY APPOINTMENTS
 def view_appointment():
-    cursor.execute('SELECT * FROM APPOINTMENT_TABLE')
-    appointments = cursor.fetchall()
-    for appointment in appointments:
-        print(appointment)
     pat_id=int(input("ENTER YOUR PATIENT ID:"))
     cursor.execute("SELECT PATIENT_ID FROM APPOINTMENT_TABLE WHERE PATIENT_ID=?",(pat_id,))
     patient_ids = cursor.fetchall()
