@@ -111,8 +111,6 @@ def appointment():
         doc_id=int(input("ENTER DOCTOR ID WITH WHOM YOU WANT TO BOOK APPOINTMENT:"))
     except:
         print("INVALID INPUT")
-    # appointment_date=(input("ENTER DATE AND TIME FOR YOUR APPOINTMENT (YYYY-MM-DD HH-MM):"))
-    # appointment_full_date=datetime.strptime(appointment_date,"%Y-%m-%d %H:%M")
     while True:
         try:
             appointment_date = input("ENTER DATE AND TIME FOR YOUR APPOINTMENT (YYYY-MM-DD HH-MM): ")
