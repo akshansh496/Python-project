@@ -20,13 +20,13 @@ cursor.execute('''
 
 #function to add a new patient
 def patient():
-    patient_name=input("Enter your name:")
+    patient_name=input("Enter your name:").upper()
     age=input("Enter your age:")
     h=float(input("Enter your height in centimeter:"))
     w=float(input("Enter your weigth in kg:"))
-    sex=input("Enter your sex:")
-    bg=input("Enter your blood group:")
-    bmi=w/(h/100)**2
+    sex=input("Enter your sex:").upper()
+    bg=input("Enter your blood group:").upper()
+    bmi=round(w/(h/100)**2,2)
     cursor.execute('''
         INSERT INTO PATIENT_INFO
         (NAME,AGE,HEIGTH,WEIGTH,SEX,BLOOD_GROUP,BMI)
@@ -39,7 +39,7 @@ def patient():
     print(f"Your patient ID is: {patient_id}")
 
     #to store password of each user
-    password=input("CREATE YOUR PASSWORD")
+    password=input("CREATE YOUR PASSWORD").upper()
     cursor.execute('''
     UPDATE PATIENT_INFO
     SET PASSWORD=?

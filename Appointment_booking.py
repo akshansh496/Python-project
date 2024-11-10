@@ -55,6 +55,23 @@ def appointment():
     print(f"New appointment created with ID: {appointment_id}")
     print("APPOINTMENT BOOKED SUCCESSFULLY")
     conn.commit()
-appointment()
+
+
+def view_appointment():
+    pat_id = int(input("ENTER YOUR PATIENT ID:"))
+        # Fetch appointments for the given PATIENT_ID
+    cursor.execute("SELECT * FROM APPOINTMENT_TABLE WHERE PATIENT_ID=?", (pat_id,))
+    rows = cursor.fetchall()
+    if rows:
+        print(f"{'APPOINTMENT_ID':<20}{'PATIENT_ID':<12}{'DOCTOR_ID':<12}{'DATE AND TIME':<30}")
+        print("-" * 60)
+        for row in rows:   
+            print(f"{row[0]:<20}{row[1]:<12}{row[2]:<12}{row[3]:<30}")
+    else:
+        print("YOU DON'T HAVE ANY APPOINTMENTS")
+
+    conn.commit()
+    
+view_appointment()
 # Close the connection
 conn.close()
