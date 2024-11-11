@@ -8,7 +8,7 @@ cursor=conn.cursor()
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS PATIENT_INFO(
         PATIENT_ID INTEGER PRIMARY KEY AUTOINCREMENT,
-        PASSWORD VARCHAR(10) NOT NULL,
+        PASSWORD VARCHAR(10),
         NAME VARCHAR(50) NOT NULL,
         AGE INTEGER NOT NULL,
         HEIGTH DOUBLE ,
@@ -22,64 +22,59 @@ cursor.execute('''
 #function to add a new patient
 def patient():
 
-    patient_name=input("Enter your name:")
+    patient_name=input("\nEnter your name:").upper()
     try:
-        age=input("Enter your age:")
+        age=input("\nEnter your age:")
     except:
-        print("INVALID INPUT")
+        print("\nINVALID INPUT")
     try:
-        h=float(input("Enter your height in centimeter:"))
+        h=input("\nEnter your height in centimeter:")
     except:
-        print("INAVLID INPUT")
+        print("\nINAVLID INPUT")
     try:
-        w=float(input("Enter your weigth in kg:"))
+        w=input("\nEnter your weigth in kg:")
     except:
-        print("INAVLID INPUT")
-    sex=input("Enter your sex:")
-    bg=input("Enter your blood group:")
-    bmi=w/(h/100)**2
+        print("\nINAVLID INPUT")
+    sex=input("\nEnter your sex:").upper()
+    bg=input("\nEnter your blood group:").upper()
+    bmi=round(float(w)/(float(h)/100)**2,2)
+    password=input("\nCREATE YOUR PASSWORD:").upper()
     cursor.execute('''
         INSERT INTO PATIENT_INFO
-        (NAME,AGE,HEIGTH,WEIGTH,SEX,BLOOD_GROUP,BMI)
-         VALUES (?, ?, ?, ?, ?, ?, ?)
-    ''', (patient_name, age, h, w, sex, bg, bmi))
+        (NAME,AGE,HEIGTH,WEIGTH,SEX,BLOOD_GROUP,BMI,PASSWORD)
+         VALUES (?, ?, ?, ?, ?, ?, ?,?)
+    ''', (patient_name, age, h, w, sex, bg, bmi,password))
     conn.commit()
     #to display patient its patient id
     patient_id = cursor.lastrowid
-    print(f"Your patient ID is: {patient_id}")
-    conn.commit()
-    #to store password of each user
-    password=input("CREATE YOUR PASSWORD:")
-    cursor.execute('''
-    UPDATE PATIENT_INFO
-    SET PASSWORD=?
-    WHERE PATIENT_ID=?
-    ''',(password,patient_id))
+    print(f"\nYour patient ID is: {patient_id}")
     conn.commit()
     print("\nYOUR I'D HAS BEEN SUCCESSFULLY CREATED")
-
 
 #creation of doctor's table
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS DOCTOR_INFO(
                DOCTOR_ID INTEGER PRIMARY KEY AUTOINCREMENT,
                NAME VARCHAR(50) NOT NULL,
-               SPECIALISATION VARCHAR(50)    
+               SPECIALISATION VARCHAR(50),
+               PASSWORD1 VARCHAR(10) NOT NULL     
                );
 ''')
 
 #function to add doctor's info
 def doctor_info():
-    doctor_name=input("Enter your name:")
-    specialisation=input("Enter your specialisation if any:")
+    doctor_name=input("\nENTER YOUR NAME:").upper()
+    specialisation=input("\nENTER YOUR SPECIALISATION IF ANY:").upper()
+    password1=input("\nCREATE YOUR PASSWORD:").upper()
     cursor.execute('''
         INSERT INTO DOCTOR_INFO
-                   (NAME,SPECIALISATION) 
-                   VALUES(?,?)      
-''',(doctor_name,specialisation))
+                   (NAME,SPECIALISATION,PASSWORD1) 
+                   VALUES(?,?,?)      
+''',(doctor_name,specialisation,password1))
     doctor_id = cursor.lastrowid
     print(f"Your doctor ID is: {doctor_id}")
     conn.commit()
+    print("\nYOUR I'D HAS BEEN SUCCESSFULLY CREATED")
 
 #Creation of appointment table
 cursor.execute('''
@@ -95,34 +90,41 @@ cursor.execute('''
 
 #function to book appointment
 
-def appointment():
+def appointment(a):
     try:
-        pat_id=int(input("ENTER YOUR PATIENT I'D:"))
+        pat_id=a
     except:
-        print("INAVLID INPUT")
-    print("AVAILABLE DOCTORS:\n")
-    print(f"{'DOCTOR_ID':<12}{'DOCTOR\'S NAME':<20}{'DOCTOR\'S SPECIALISATION':<25}")
+        print("\nINAVLID INPUT")
+    print("\nAVAILABLE DOCTORS:\n")
+    print(f"{'DOCTOR_ID':<12}{'DOCTOR\'S NAME':<30}{'DOCTOR\'S SPECIALISATION':<25}")
     print("-" * 90) 
 
     cursor.execute('''SELECT * FROM DOCTOR_INFO''')
     for row in cursor.fetchall():
-        print(f"{row[0]:<12}{row[1]:<20}{row[2]:<25}")
+        print(f"{row[0]:<12}{row[1]:<30}{row[2]:<25}")
     try:
-        doc_id=int(input("ENTER DOCTOR ID WITH WHOM YOU WANT TO BOOK APPOINTMENT:"))
+        doc_id=int(input("\nENTER DOCTOR ID WITH WHOM YOU WANT TO BOOK APPOINTMENT:"))
     except:
-        print("INVALID INPUT")
+        print("\nINVALID INPUT")
     while True:
         try:
-            appointment_date = input("ENTER DATE AND TIME FOR YOUR APPOINTMENT (YYYY-MM-DD HH-MM): ")
+            appointment_date = input("\nENTER DATE AND TIME FOR YOUR APPOINTMENT (YYYY-MM-DD HH-MM): ")
             appointment_full_date = datetime.strptime(appointment_date, "%Y-%m-%d %H:%M")
             
             # Check if the entered date and time are in the future
             if appointment_full_date < datetime.now():
-                print("ERROR: Appointment date and time must be in the future. Please try again.")
+                print("\nERROR: Appointment date and time must be in the future. Please try again.")
+            cursor.execute('''
+                SELECT * FROM APPOINTMENT_TABLE 
+                WHERE DOCTOR_ID = ? AND APPOINTMENT_DATE_TIME = ?
+            ''', (doc_id, str(appointment_full_date)))
+            
+            if cursor.fetchone():
+                print("\nERROR: This doctor already has an appointment at the specified date and time. Please choose a different time.")
             else:
                 break
         except ValueError:
-            print("INVALID DATE FORMAT. Please use YYYY-MM-DD HH-MM format.")
+            print("\nINVALID DATE FORMAT. Please use YYYY-MM-DD HH-MM format.")
 
     cursor.execute('''
     INSERT INTO APPOINTMENT_TABLE
@@ -130,21 +132,34 @@ def appointment():
                    VALUES(?,?,?)
 ''',(pat_id,doc_id,str(appointment_full_date)))
     appointment_id = cursor.lastrowid
-    print(f"New appointment created with ID: {appointment_id}")
-    print("APPOINTMENT BOOKED SUCCESSFULLY")
+    print(f"\nYour appointment ID: {appointment_id}")
+    print("\nAPPOINTMENT BOOKED SUCCESSFULLY")
     conn.commit()
 
 #VIEWING MY APPOINTMENTS
-def view_appointment():
-    pat_id = int(input("ENTER YOUR PATIENT ID:"))
+def view_appointment(d):
+    pat_id =d
     
     # Fetch appointments for the given PATIENT_ID
     cursor.execute("SELECT * FROM APPOINTMENT_TABLE WHERE PATIENT_ID=?", (pat_id,))
     rows = cursor.fetchall()
-    print(f"{'APPOINTMENT_ID':<20}{'PATIENT_ID':<12}{'DOCTOR_ID':<12}{'DATE AND TIME':<30}")
-    print("-" * 60)
     if rows:
         print(f"{'APPOINTMENT_ID':<20}{'PATIENT_ID':<12}{'DOCTOR_ID':<12}{'DATE AND TIME':<30}")
+        print("-" * 60)
+        for row in rows:   
+            print(f"{row[0]:<20}{row[1]:<12}{row[2]:<12}{row[3]:<30}")
+    else:
+        print("\nYOU DON'T HAVE ANY APPOINTMENTS")
+
+    conn.commit()
+
+def view_doctor_appointment(d):
+    doc_id =d
+        # Fetch appointments for the given DOCTOR_ID
+    cursor.execute("SELECT * FROM APPOINTMENT_TABLE WHERE DOCTOR_ID=?",(doc_id,))
+    rows = cursor.fetchall()
+    if rows:
+        print(f"\n{'APPOINTMENT_ID':<20}{'PATIENT_ID':<12}{'DOCTOR_ID':<12}{'DATE AND TIME':<30}")
         print("-" * 60)
         for row in rows:   
             print(f"{row[0]:<20}{row[1]:<12}{row[2]:<12}{row[3]:<30}")
@@ -153,37 +168,94 @@ def view_appointment():
 
     conn.commit()
 
+#function to login for users already registered
+def patient_login():
+    id=input("\nENTER YOUR PATIENT ID:")
+    passkey=input("\nENTER YOUR PASSWORD:")
+    cursor.execute("SELECT * FROM PATIENT_INFO WHERE PATIENT_ID=? AND PASSWORD=?",(id,passkey,))
+    rows=cursor.fetchall()
+    if rows:
+        print(f"{'PATIENT ID':<15}{'NAME':<30}{'AGE':<5}{'HEIGHT':<10}{'WEIGTH':<10}{'SEX':<10}{'BLOOD GROUP':<15}{'BMI':<10}")
+        print("_"*100)
+        for row in rows:
+            print(f"{row[0]:<15}{row[2]:<30}{row[3]:<5}{row[4]:<10}{row[5]:<10}{row[6]:<10}{row[7]:<15}{row[8]:<10}")
+
+        while True:
+            print("\n1.BOOK AN APPOINTMENT")
+            print("\n2.VIEW MY APPOINTMENTS")
+            print("\n3. EXIT")
+            try:
+                choice2=int(input("ENTER YOUR CHOICE:"))
+                if choice2==1:
+                    appointment(id)
+                elif choice2==2:
+                    view_appointment(id)
+                elif choice2==3:
+                    print("Exiting the patient portal")
+                    break
+                else:
+                    print("INVALID INPUT")
+            except:
+                print("INVALID INPUT")
+    else:
+        print("\nWRONG PATIENT ID OR PASSWORD")
+    conn.commit()
+    
+#function to login to existing doctor id
+def doctor_login():
+    d_id=input("\nENTER YOUR ID:")
+    passkey1=input("\nENTER YOUR PASSWORD:")
+    cursor.execute('''SELECT * FROM DOCTOR_INFO WHERE DOCTOR_ID=? AND PASSWORD1=?''',(d_id,passkey1))
+    rows=cursor.fetchall()
+    if rows:
+        print(f"\n{'DOCTOR_ID':<15}{'DOCTOR NAME':<30}{'SPECIALISATION':<50}")
+        print("-"*100)
+        for row in rows:
+            print(f"{row[0]:<15}{row[1]:<30}{row[2]:<50}")
+    else:
+        print("\nWRONG DOCTOR ID OR PASSWORD")
+    while True:
+        print("\n1.VIEW APPOINTMENTS")
+        print("\n2.EXIT")
+        try:
+            choice2=int(input("\nENTER YOUR CHOICE:"))
+            match choice2:
+                case 1:
+                    view_doctor_appointment(d_id)
+                case 2:
+                    print("\nEXITING THE DOCTOR PORTAL")
+                    break
+        except:
+            print("\nINVALID INPUT")
 
 #main
 print("\nWELCOME TO HOSPITAL MANAGEMENT SYSTEM")
 while True:
     print("\n1.CREATE A NEW PROFILE AS PATIENT")
-    print("2.CREATE A NEW PROFILE AS DOCTOR")     
-    print("3.BOOK AN APPOINTMENT")
-    print("4.VIEW MY APPOINTMENTS")
-    print("5. EXIT")
-    
+    print("\n2.CREATE A NEW PROFILE AS DOCTOR")     
+    print("\n3.LOGIN TO PATIENT ID")
+    print("\n4.LOGIN TO DOCTOR ID")
+    print("\n5.. EXIT")
     try:
-        choice = int(input("Enter your choice: "))
-        
-        if choice == 1:
-            patient()
-        elif choice == 2:
-            doctor_info()
-        elif choice == 3:
-            appointment()
-        elif choice == 4:
-            view_appointment()
-        elif choice == 5:
-            print("Exiting the system.")
-            break
-        else:
-            print("Invalid choice. Please try again.")
-    
+        choice1=int(input("\nENTER YOUR CHOICE:"))
     except ValueError:
-        print("Please enter a valid number.")
-
+        print("\nPlease enter a valid number.")
+    match choice1:
+        case 1:
+            patient()
+        case 2:
+            doctor_info()
+        case 3:
+            patient_login()
+        case 4:
+            doctor_login()
+        case 5:
+            print("EXITING THE SYSTEM.")
+            break
+        case _:
+            print("INVALID INPUT")
+        
 conn.commit()
 
 # Close the connection
-conn.close()
+conn.close()q
