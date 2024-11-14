@@ -1,1 +1,152 @@
-.
+# Hospital Staff Management System with SQLite Integration
+
+import sqlite3
+
+class Staff:
+    def __init__(self, staff_id, name, role, department, contact_info):
+        self.staff_id = staff_id
+        self.name = name
+        self.role = role
+        self.department = department
+        self.contact_info = contact_info
+
+    def display_info(self):
+        print(f"Staff ID: {self.staff_id}")
+        print(f"Name: {self.name}")
+        print(f"Role: {self.role}")
+        print(f"Department: {self.department}")
+        print(f"Contact Info: {self.contact_info}")
+
+
+class StaffManagementSystem:
+    def __init__(self):
+        self.conn = sqlite3.connect('hospital_staff.db')
+        self.cursor = self.conn.cursor()
+        self.create_table()
+
+    def create_table(self):
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS staff (
+                staff_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                role TEXT NOT NULL,
+                department TEXT NOT NULL,
+                contact_info TEXT NOT NULL
+            )
+        ''')
+        self.conn.commit()
+
+    def add_staff(self):
+        try:
+            name = input("Enter Name: ")
+            if not name:
+                raise ValueError("Name cannot be empty.")
+            role = input("Enter Role: ")
+            if not role:
+                raise ValueError("Role cannot be empty.")
+            department = input("Enter Department: ")
+            if not department:
+                raise ValueError("Department cannot be empty.")
+            contact_info = input("Enter Contact Info: ")
+            if not contact_info:
+                raise ValueError("Contact Info cannot be empty.")
+            
+            self.cursor.execute('''
+                INSERT INTO staff (name, role, department, contact_info)
+                VALUES (?, ?, ?, ?)
+            ''', (name, role, department, contact_info))
+            self.conn.commit()
+            print(f"Staff member {name} added successfully.")
+        except ValueError as ve:
+            print(f"Input error: {ve}")
+        except Exception as e:
+            print(f"Error while adding staff: {e}")
+
+    def remove_staff(self):
+        try:
+            staff_id = int(input("Enter Staff ID to remove: "))
+            self.cursor.execute('SELECT * FROM staff WHERE staff_id = ?', (staff_id,))
+            staff = self.cursor.fetchone()
+            if staff:
+                self.cursor.execute('DELETE FROM staff WHERE staff_id = ?', (staff_id,))
+                self.conn.commit()
+                print(f"Staff member with ID {staff_id} removed successfully.")
+            else:
+                print("Staff ID not found.")
+        except ValueError:
+            print("Invalid input. Please enter a numeric Staff ID.")
+        except Exception as e:
+            print(f"Error while removing staff: {e}")
+
+    def display_all_staff(self):
+        try:
+            self.cursor.execute('SELECT * FROM staff')
+            all_staff = self.cursor.fetchall()
+            if not all_staff:
+                print("No staff members found.")
+                return
+            for staff in all_staff:
+                print("-----------------")
+                print(f"Staff ID: {staff[0]}")
+                print(f"Name: {staff[1]}")
+                print(f"Role: {staff[2]}")
+                print(f"Department: {staff[3]}")
+                print(f"Contact Info: {staff[4]}")
+                print("-----------------")
+        except Exception as e:
+            print(f"Error while displaying staff: {e}")
+
+    def find_staff(self):
+        try:
+            staff_id = int(input("Enter Staff ID to find: "))
+            self.cursor.execute('SELECT * FROM staff WHERE staff_id = ?', (staff_id,))
+            staff = self.cursor.fetchone()
+            if staff:
+                print("Staff member found:")
+                print("-----------------")
+                print(f"Staff ID: {staff[0]}")
+                print(f"Name: {staff[1]}")
+                print(f"Role: {staff[2]}")
+                print(f"Department: {staff[3]}")
+                print(f"Contact Info: {staff[4]}")
+                print("-----------------")
+            else:
+                print("Staff ID not found.")
+        except ValueError:
+            print("Invalid input. Please enter a numeric Staff ID.")
+        except Exception as e:
+            print(f"Error while finding staff: {e}")
+
+    def __del__(self):
+        self.conn.close()
+
+
+# Main Program
+if __name__ == "__main__":
+    system = StaffManagementSystem()
+    
+    while True:
+        try:
+            print("\n1. Add Staff Member")
+            print("2. Remove Staff Member")
+            print("3. Display All Staff Members")
+            print("4. Find Staff Member")
+            print("5. Exit")
+            choice = input("Enter your choice: ")
+            
+            if choice == "1":
+                system.add_staff()
+            elif choice == "2":
+                system.remove_staff()
+            elif choice == "3":
+                system.display_all_staff()
+            elif choice == "4":
+                system.find_staff()
+            elif choice == "5":
+                print("Exiting the program.")
+                break
+            else:
+                print("Invalid choice. Please try again.")
+        except Exception as e:
+            print(f"Error in main menu: {e}")
+
