@@ -1,0 +1,85 @@
+import tkinter as tk
+from tkinter import messagebox
+from tkinter import ttk
+
+class PrescriptionApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Prescription Table")
+        
+        # Labels
+        tk.Label(root, text="Medicine Name").grid(row=0, column=0, padx=10, pady=10)
+        tk.Label(root, text="Doses").grid(row=0, column=1, padx=10, pady=10)
+        tk.Label(root, text="Timing").grid(row=0, column=2, padx=10, pady=10)
+
+        # Entry fields
+        self.medicine_name_entry = tk.Entry(root)
+        self.doses_entry = tk.Entry(root)
+        self.timing_entry = tk.Entry(root)
+        
+        
+        self.medicine_name_entry.grid(row=1, column=0, padx=10, pady=10)
+        self.doses_entry.grid(row=1, column=1, padx=10, pady=10)
+        self.timing_entry.grid(row=1, column=2, padx=10, pady=10)
+
+        # Add Button
+        tk.Button(root, text="Add Entry", command=self.add_entry).grid(row=1, column=5, padx=10, pady=10)
+
+        # Table
+        columns = ("Medicine Name", "Doses", "Timing")
+        self.tree = ttk.Treeview(root, columns=columns, show="headings", height=10)
+        for col in columns:
+            self.tree.heading(col, text=col)
+            self.tree.column(col, anchor="center", width=100)
+        
+        self.tree.grid(row=2, column=0, columnspan=6, padx=10, pady=10)
+
+        # Buttons to Edit and Delete
+        tk.Button(root, text="Edit Entry", command=self.edit_entry).grid(row=3, column=2, padx=10, pady=10)
+        tk.Button(root, text="Delete Entry", command=self.delete_entry).grid(row=3, column=3, padx=10, pady=10)
+
+    def add_entry(self):
+        medicine_name = self.medicine_name_entry.get()
+        doses = self.doses_entry.get()
+        timing = self.timing_entry.get()
+
+        if medicine_name and doses and (timing):
+            self.tree.insert("", "end", values=(medicine_name, doses, timing))
+            self.clear_entries()
+        else:
+            messagebox.showwarning("Input Error", "Please fill out all fields")
+
+    def edit_entry(self):
+        selected_item = self.tree.selection()
+        if not selected_item:
+            messagebox.showwarning("Selection Error", "No entry selected")
+            return
+
+        medicine_name = self.medicine_name_entry.get()
+        doses = self.doses_entry.get()
+        timing= self.timing_entry.get()
+        
+
+        if medicine_name and doses and (timing):
+            self.tree.item(selected_item, values=(medicine_name, doses, timing))
+            self.clear_entries()
+        else:
+            messagebox.showwarning("Input Error", "Please fill out all fields")
+
+    def delete_entry(self):
+        selected_item = self.tree.selection()
+        if not selected_item:
+            messagebox.showwarning("Selection Error", "No entry selected")
+            return
+        self.tree.delete(selected_item)
+
+    def clear_entries(self):
+        self.medicine_name_entry.delete(0, tk.END)
+        self.doses_entry.delete(0, tk.END)
+        self.timing_entry.delete(0, tk.END)
+       
+
+# Main application
+root = tk.Tk()
+app = PrescriptionApp(root)
+root.mainloop()
