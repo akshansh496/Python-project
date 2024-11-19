@@ -1,1 +1,97 @@
+import tkinter as tk
+from tkinter import scrolledtext
+
+def medical_chatbot_response(user_input):
+    # Expanded advice database with more diseases
+    advice_database = {
+        "fever": "Drink plenty of fluids, rest, and take paracetamol if needed. See a doctor if it persists.",
+        "cough": "Stay hydrated, drink warm liquids, and try a cough suppressant if severe. Seek help if it worsens.",
+        "headache": "Rest in a quiet place, stay hydrated, and consider over-the-counter pain relief.",
+        "stomach ache": "Eat light meals, avoid spicy foods, and drink clear fluids. Consult a doctor if the pain is severe.",
+        "cold": "Stay warm, drink plenty of fluids, and consider steam inhalation for nasal congestion.",
+        "sore throat": "Gargle with warm salt water, drink warm fluids, and use throat lozenges for relief.",
+        "diarrhea": "Stay hydrated with oral rehydration solutions. Avoid dairy and eat light, bland foods.",
+        "vomiting": "Sip clear fluids to stay hydrated. Avoid solid foods until vomiting stops.",
+        "rash": "Keep the area clean and avoid irritants. Use over-the-counter hydrocortisone cream if needed.",
+        "back pain": "Apply a warm or cold compress, maintain good posture, and consider gentle stretching exercises.",
+        "joint pain": "Rest the affected joint, use ice packs, and consider an anti-inflammatory medication.",
+        "dizziness": "Sit or lie down immediately to avoid falling. Stay hydrated and avoid sudden movements.",
+        "fatigue": "Ensure proper sleep, eat a balanced diet, and stay hydrated. Consult a doctor if persistent.",
+        "eye strain": "Take breaks from screens, use artificial tears, and ensure proper lighting.",
+        "insomnia": "Maintain a regular sleep schedule, avoid caffeine before bed, and create a calming bedtime routine.",
+        "anxiety": "Practice deep breathing, engage in physical activity, and consider relaxation techniques like meditation.",
+        "constipation": "Increase fiber intake, stay hydrated, and engage in regular physical activity.",
+        "indigestion": "Avoid spicy or greasy foods, eat smaller meals, and avoid lying down immediately after eating.",
+        "high blood pressure": "Limit salt intake, manage stress, and engage in regular exercise. Consult a doctor for medication if necessary.",
+        "low blood pressure": "Stay hydrated, avoid sudden movements, and eat smaller, more frequent meals.",
+        "allergy": "Identify and avoid allergens. Take antihistamines if needed and consult a doctor for severe reactions.",
+        "asthma": "Avoid triggers, use a prescribed inhaler, and see a doctor if symptoms worsen.",
+        "flu": "Rest, drink plenty of fluids, and consider over-the-counter medications for symptom relief.",
+        "skin dryness": "Apply a moisturizer, avoid hot showers, and use a humidifier if needed.",
+        "acne": "Keep the skin clean, avoid heavy makeup, and use over-the-counter acne treatments containing salicylic acid or benzoyl peroxide.",
+        "heartburn": "Avoid spicy or fatty foods, eat smaller meals, and avoid lying down immediately after eating.",
+        "pimples": "Wash your face with a gentle cleanser twice a day and avoid popping pimples to prevent scarring.",
+        "muscle pain": "Rest the affected muscle, apply heat or cold, and consider gentle stretching or massage.",
+        "arthritis": "Engage in gentle exercises, use pain relief medications, and consider physical therapy.",
+        "pneumonia": "Rest, drink plenty of fluids, and see a doctor for antibiotics if necessary.",
+        "bronchitis": "Rest, stay hydrated, and use a cough suppressant. Consult a doctor if symptoms worsen.",
+        "gout": "Avoid foods high in purines (like red meat), drink plenty of water, and consult a doctor for treatment.",
+        "migraine": "Rest in a dark, quiet room, stay hydrated, and take over-the-counter pain relief. Avoid migraine triggers.",
+        "kidney stones": "Drink plenty of water and avoid foods high in oxalates. Seek medical treatment for severe pain.",
+        "sinusitis": "Use a saline nasal spray, apply warm compresses, and consider over-the-counter pain relievers.",
+        "dandruff": "Use a medicated shampoo containing zinc pyrithione or selenium sulfide to control flaking.",
+        "cold sores": "Apply antiviral creams and avoid touching the sores. Drink fluids and rest.",
+        "ringworm": "Apply antifungal creams and keep the area clean and dry.",
+        "chickenpox": "Stay hydrated, avoid scratching, and use calamine lotion for itch relief. See a doctor if complications arise.",
+        "eczema": "Moisturize your skin regularly, avoid irritants, and use corticosteroid creams if prescribed.",
+        "UTI (Urinary Tract Infection)": "Drink plenty of water, avoid caffeine, and consult a doctor for antibiotics if necessary.",
+        "shingles": "Consult a doctor for antiviral medications. Apply soothing lotions to reduce itching and discomfort.",
+        "toothache": "Rinse with warm salt water, take over-the-counter pain relief, and see a dentist as soon as possible.",
+        "cystic fibrosis": "Follow prescribed treatments, including breathing exercises and medications. Consult a specialist regularly."
+    }
+
+    # Check if symptom matches
+    for symptom, advice in advice_database.items():
+        if symptom in user_input.lower():
+            return advice
+
+    return "I'm sorry, I don't have advice for that. Please consult a healthcare provider."
+
+def send_message():
+    user_input = user_entry.get()
+    if user_input.strip():  # Ensure the user doesn't send empty messages
+        chat_history.config(state=tk.NORMAL)
+        chat_history.insert(tk.END, f"You: {user_input}\n")
+        response = medical_chatbot_response(user_input)
+        chat_history.insert(tk.END, f"Chatbot: {response}\n\n")
+        chat_history.config(state=tk.DISABLED)
+        user_entry.delete(0, tk.END)
+        chat_history.yview(tk.END)  # Auto-scroll to the latest message
+
+# Tkinter GUI setup
+root = tk.Tk()
+root.title("Medical Advice Chatbot")
+root.geometry("600x700")
+
+# Chat history display
+chat_history = scrolledtext.ScrolledText(root, wrap=tk.WORD, state=tk.DISABLED, font=("Arial", 12))
+chat_history.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
+
+# User input
+user_entry = tk.Entry(root, font=("Arial", 14))
+user_entry.pack(padx=10, pady=5, fill=tk.X)
+user_entry.bind("<Return>", lambda event: send_message())  # Press Enter to send message
+
+# Send button
+send_button = tk.Button(root, text="Send", font=("Arial", 12), command=send_message, bg="lightblue")
+send_button.pack(pady=10)
+
+# Initialize chatbot greeting
+chat_history.config(state=tk.NORMAL)
+chat_history.insert(tk.END, "Chatbot: Welcome to the Medical Advice Chatbot!\n")
+chat_history.insert(tk.END, "Chatbot: Describe your symptoms to receive advice. Type 'exit' to close.\n\n")
+chat_history.config(state=tk.DISABLED)
+
+# Run the Tkinter main loop
+root.mainloop()
 
