@@ -40,13 +40,12 @@ def view_all_bills(conn):
     for row in rows:
         print(f"{row[0]}\t{row[1]}\t{row[2]}")
 
-def calculate_total_bill():
+def calculate_total_bill(conn, total_label):
     """Calculates the total amount of all bills."""
-    # ... (existing code for calculating total amount)
-    global total_label
-    total_label.config(text=f"Total Bill Amount: {total_amount:.2f}")
+    cursor = conn.cursor()
+    cursor.execute("SELECT SUM(amount) FROM bills")
+    total_amount = cursor.fetchone()[0]
 
-    # Update the GUI to display total amount
     total_label.config(text=f"Total Bill Amount: {total_amount:.2f}")
 
 def create_gui():
@@ -86,12 +85,10 @@ def create_gui():
     view_bills_button.pack()
 
     # Button to calculate total
-    calculate_button = tk.Button(root, text="Calculate Total", command=lambda: calculate_total_bill(conn))
-    calculate_button.pack()
-
-    # Label to display total amount
     total_label = tk.Label(root, text="Total Bill Amount: ")
     total_label.pack()
+    calculate_button = tk.Button(root, text="Calculate Total", command=lambda: calculate_total_bill(conn, total_label))
+    calculate_button.pack()
 
     root.mainloop()
 
