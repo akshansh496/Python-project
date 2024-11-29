@@ -29,30 +29,30 @@ def add_bill(conn, description, amount):
     cursor.execute("INSERT INTO bills (description, amount) VALUES (?, ?)", (description, amount))
     conn.commit()
 
-def view_all_bills(conn):
-    """Displays all bills from the database."""
+def clear_all_bills(conn):
+    """Deletes all bills from the database."""
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM bills")
-    rows = cursor.fetchall()
+    cursor.execute("DELETE FROM bills")
+    conn.commit()
 
-    print("ID\tDescription\tAmount")
-    print("-" * 30)
-    for row in rows:
-        print(f"{row[0]}\t{row[1]}\t{row[2]}")
+def view_all_bills(conn, text_box, bill_descriptions, bill_amounts):
+    """Displays all bills from the database in a Tkinter text box."""
+    text_box.delete('1.0', tk.END)  # Clear the text box
+    text_box.insert(tk.END, "ID\tDescription\tAmount\n")
+    text_box.insert(tk.END, "-" * 30 + "\n")
+    for i, (description, amount) in enumerate(zip(bill_descriptions, bill_amounts)):
+        text_box.insert(tk.END, f"{i+1}\t{description}\t{amount:.2f}\n")
 
-def calculate_total_bill(conn, total_label):
-    """Calculates the total amount of all bills."""
-    cursor = conn.cursor()
-    cursor.execute("SELECT SUM(amount) FROM bills")
-    total_amount = cursor.fetchone()[0]
-
+def calculate_total_bill(conn, total_label, bill_amounts):
+    """Calculates the total amount of all bills (after clearing them)."""
+    total_amount = sum(bill_amounts)
     total_label.config(text=f"Total Bill Amount: {total_amount:.2f}")
 
 def create_gui():
     root = tk.Tk()
     root.title("Bill Management System")
 
-    # Labels for description and amount
+    #Labels for description and amount
     description_label = tk.Label(root, text="Description:")
     description_label.pack()
     description_entry = tk.Entry(root)
@@ -63,13 +63,22 @@ def create_gui():
     amount_entry = tk.Entry(root)
     amount_entry.pack()
 
-    # Button to add a new bill
+    #Lists to store bill descriptions and amounts
+    bill_descriptions = []
+    bill_amounts = []
+
+    #Text box to display bills
+    text_box = tk.Text(root, height=10, width=40)
+    text_box.pack()
+
+    #Button to add a new bill
     def add_bill_click():
         description = description_entry.get()
         amount_str = amount_entry.get()
         try:
             amount = float(amount_str)
-            add_bill(conn, description, amount)
+            bill_descriptions.append(description)
+            bill_amounts.append(amount)
             description_entry.delete(0, tk.END)
             amount_entry.delete(0, tk.END)
         except ValueError:
@@ -80,14 +89,14 @@ def create_gui():
     add_bill_button = tk.Button(root, text="Add Bill", command=add_bill_click)
     add_bill_button.pack()
 
-    # Button to view all bills
-    view_bills_button = tk.Button(root, text="View Bills", command=lambda: view_all_bills(conn))
+    #Button to view all bills
+    view_bills_button = tk.Button(root, text="View Bills", command=lambda: view_all_bills(conn, text_box, bill_descriptions, bill_amounts))
     view_bills_button.pack()
 
-    # Button to calculate total
+    #Button to calculate total
     total_label = tk.Label(root, text="Total Bill Amount: ")
     total_label.pack()
-    calculate_button = tk.Button(root, text="Calculate Total", command=lambda: calculate_total_bill(conn, total_label))
+    calculate_button = tk.Button(root, text="Calculate Total", command=lambda: calculate_total_bill(conn, total_label, bill_amounts))
     calculate_button.pack()
 
     root.mainloop()
